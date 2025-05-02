@@ -1,17 +1,34 @@
 #include "game.h"
-#include "input.h"
+
+
 
 //each vector in the board vector is a row. first vector is the top row, and first element in that vector is the leftmost element/cell.
+
 std::vector <std::vector<int>> board;
 int boardSize = 4;
+int largestPossiblePower;
+std::vector <tile> tiles;
+tile empty;
+
+void initGame(){
+    empty.power, empty.decimalValue, empty.strLen = 0;
+    empty.string = "";
+    tiles.push_back(empty);
+    largestPossiblePower = pow(boardSize, 2)+1;
+    for (int i = 0; i < largestPossiblePower; i++){
+        tiles.push_back(tile(i+1));
+    }
+    initBoard(boardSize);
+}
 
 void initBoard(int size){
-    std::vector <int> column;
+    std::vector <int> row;
     for (int i = 0; i < size; i++){
         for (int j = 0; j < size; j++){ 
-            column.push_back(0);
+            row.push_back(0);
         }
-        board.push_back(column);
+        board.push_back(row);
+        row.clear();
     }
 }
 
@@ -34,10 +51,10 @@ int spawnTile(){
 
 
     if (diceRoll < 9){
-        board.at(boardRow).insert(board.at(boardRow).begin() + boardCol, 2);
+        board.at(boardRow).at(boardCol) = 1;
     }
     else{
-        board.at(boardRow).insert(board.at(boardRow).begin() + boardCol, 4);
+        board.at(boardRow).at(boardCol) = 2;
     }
     
     
@@ -115,7 +132,7 @@ void moveUp(){
             c90mBoard.at(j).push_back(board.at(i).at(j));
         }
     }
-    //After rotating, 
+    //After rotating, we make the movements here.
 }
 
 void moveLeft(){

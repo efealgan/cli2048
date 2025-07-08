@@ -6,7 +6,7 @@
 #ifdef _WIN32
     #include <conio.h> // Windows
 #else
-    #include <termios.h> // Linux, macOS
+    #include <termios.h> // Linux
     #include <unistd.h>
 #endif
 

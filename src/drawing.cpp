@@ -7,6 +7,7 @@ int rowCounter = 0;
 void drawBoard(std::vector<std::vector<int>> boardData){
     drawUpperBorder();
     int lineCounter = 0;
+    rowCounter = 0;
     
     bool runLoop = true;
 
@@ -38,6 +39,7 @@ void drawUpperBorder(){
 }
 
 void drawRow(std::vector<tile> tilesToDraw){
+    
     int padL = tileSizeH;
     int padR = tileSizeH;
     for (int lineNo = 0; lineNo < tileSizeV; lineNo++){

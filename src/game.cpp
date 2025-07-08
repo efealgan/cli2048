@@ -9,15 +9,23 @@ int boardSize = 4;
 int largestPossiblePower;
 std::vector <tile> tiles;
 tile empty;
+int boardCapacity = 16;
 
 void initGame(){
+    //assign values to the "empty" tile object
     empty.power, empty.decimalValue, empty.strLen = 0;
     empty.string = "";
+
+
     tiles.push_back(empty);
+
     largestPossiblePower = pow(boardSize, 2)+1;
+
+    //create tile objects as long as they can be achieved with the given board size.
     for (int i = 0; i < largestPossiblePower; i++){
         tiles.push_back(tile(i+1));
     }
+
     initBoard(boardSize);
 }
 
@@ -35,31 +43,60 @@ void initBoard(int size){
 int spawnTile(){
     std::random_device rd;
     std::mt19937 gen(rd());
-    int boardCol;
-    int boardRow;
+    //initialize coordinates
+    int boardCol = 0;
+    int boardRow = 0;
 
     std::uniform_int_distribution<> dice(1,10);
     int diceRoll = dice(gen);
     std::cout << "Dice roll: " << diceRoll << std::endl;
     std::uniform_int_distribution<> coordinate(0, boardSize-1);
-    do{
-        boardCol = coordinate(gen);
-        std::cout << "Board Column: " << boardCol << std::endl;
-        boardRow = coordinate(gen);
-        
-    } while (board.at(boardRow).at(boardCol) != 0);
 
 
-    if (diceRoll < 9){
-        board.at(boardRow).at(boardCol) = 1;
+    //check if there is an empty space || Game Over
+    if(isBoardFull(board)){
+        std::cout << "Game Over!\n";
     }
+
+    //find an empty space
     else{
-        board.at(boardRow).at(boardCol) = 2;
+        do{
+            boardCol = coordinate(gen);
+            std::cout << "Board Column: " << boardCol << std::endl;
+            boardRow = coordinate(gen);
+
+        } while (board.at(boardRow).at(boardCol) != 0);
+
+
+        if (diceRoll < 9){
+            board.at(boardRow).at(boardCol) = 1;
+        }
+        else{
+            board.at(boardRow).at(boardCol) = 2;
+        }
     }
-    
     
 
     return 0;
+}
+
+bool isBoardFull(std::vector <std::vector<int>> board){
+    bool answer = false;
+    int occupiedSlots = 0;
+
+    for (int i = 0; i < boardSize; i++){
+        for (int j = 0; j < boardSize; j++){
+            if (board.at(i).at(j)){
+                occupiedSlots++;
+            }
+        }
+    }
+
+    if (occupiedSlots == boardCapacity){
+        answer = true;
+    }
+    
+    return answer;
 }
 
 void moveBoard(int direction){
@@ -136,7 +173,10 @@ void moveUp(){
 }
 
 void moveLeft(){
-
+    for (int i = 0; i < boardSize; i++){
+        board.at(i) = moveToBegin(board.at(i));
+    }
+    
 }
 
 void moveDown(){
@@ -145,4 +185,13 @@ void moveDown(){
 
 void moveRight(){
     
+}
+
+std::vector <int> moveToBegin(std::vector<int> vector){
+    vector.erase(find(vector.begin(), vector.end(), 0));
+    return vector;
+}
+
+void moveToEnd(std::vector<int> vector){
+
 }

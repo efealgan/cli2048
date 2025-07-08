@@ -19,15 +19,16 @@ int main(){
     std::cout << "Board Size is: " << boardSize << std::endl;
     initGame();
     std::cout << board.at(0).size() << std::endl;
+    spawnTile();
+    drawBoard(board);
 
 
     bool gameRunning = true;
     while(gameRunning){
+        getInput();
         spawnTile();
-        break;
+        drawBoard(board);
     }
-
-    drawBoard(board);
 
     return 0;
 }

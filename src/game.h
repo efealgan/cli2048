@@ -4,6 +4,8 @@
 #include <vector>
 #include <random>
 #include <iostream>
+#include <bits/stdc++.h>
+
 #include <drawing.h>
 #include "input.h"
 
@@ -11,6 +13,12 @@
  * @brief The dimensions of the board.
  */
 extern int boardSize;
+
+
+/**
+ * @brief The board can hold this many tiles.
+ */
+extern int boardCapacity;
 
 /**
  * @brief Largest possible power of two that can be reached with the given board size.
@@ -34,11 +42,18 @@ extern std::vector <struct tile> tiles;
 void initGame();
 
 void initBoard(int size);
+
 int spawnTile();
+
 void moveBoard(int direction);
+
+bool isBoardFull(std::vector <std::vector<int>> board);
+
 void moveUp();
 void moveLeft();
 void moveDown();
 void moveRight();
 
+std::vector <int> moveToBegin(std::vector<int> vector);
+void moveToEnd(std::vector<int> vector);
 #endif //GAME_H

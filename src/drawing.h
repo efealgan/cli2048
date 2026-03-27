@@ -1,8 +1,6 @@
 #ifndef DRAWING_H
 #define DRAWING_H
 
-#include <vector>
-#include <iostream>
 #include <string>
 
 #include "game.h"

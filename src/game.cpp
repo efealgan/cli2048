@@ -1,5 +1,6 @@
 #include "game.h"
-
+#include "input.h"
+#include "drawing.h"
 
 
 //each vector in the board vector is a row. first vector is the top row, and first element in that vector is the leftmost element/cell.
@@ -9,16 +10,19 @@ int boardSize = 4;
 int largestPossiblePower;
 std::vector <tile> tiles;
 tile empty;
-int boardCapacity = 16;
+int boardCapacity = 16; //now riddle me this, which stupid bastard initializes boardCapacity to 16, forgets about it, wonders why game ends prematurely -or never, depending on board size- and finds out about this after picking up this project months later?
 
 void initGame(){
     //assign values to the "empty" tile object
-    empty.power, empty.decimalValue, empty.strLen = 0;
+    empty.power = 0;
+    empty.decimalValue = 0;
+    empty.strLen = 0;
     empty.string = "";
 
 
     tiles.push_back(empty);
 
+    boardCapacity = pow(boardSize, 2);
     largestPossiblePower = pow(boardSize, 2)+1;
 
     //create tile objects as long as they can be achieved with the given board size.
@@ -31,13 +35,13 @@ void initGame(){
 
 void initBoard(int size){
     std::vector <int> row;
-    for (int i = 0; i < size; i++){
-        for (int j = 0; j < size; j++){ 
-            row.push_back(0);
-        }
-        board.push_back(row);
-        row.clear();
+    for (int i = 0; i < size; i++) { //make "size" numbers of rows filled with 0s
+        row.push_back(0);
     }
+    for (int i = 0; i < size; i++) { //yeet created rows into "board", "size" times.
+        board.push_back(row);
+    }
+    row.clear();
 }
 
 int spawnTile(){
@@ -81,22 +85,70 @@ int spawnTile(){
 }
 
 bool isBoardFull(std::vector <std::vector<int>> board){
-    bool answer = false;
-    int occupiedSlots = 0;
 
     for (int i = 0; i < boardSize; i++){
         for (int j = 0; j < boardSize; j++){
-            if (board.at(i).at(j)){
-                occupiedSlots++;
+            if (!(board.at(i).at(j))){ //look for a zero
+                return false;               //there is a zero, board isnt full.
             }
         }
     }
+    return true;                            //couldn't find a zero, board is full.
+}
 
-    if (occupiedSlots == boardCapacity){
-        answer = true;
+std::vector <int> extractNonZerosR(int selectedRow = 0){
+    std::vector<int> row;
+    for (int i = boardSize - 1; i >= 0; i--) {
+        if (board[selectedRow][i] != 0) {
+            row.push_back(board[selectedRow][i]);
+        }
     }
-    
-    return answer;
+    return row;
+}
+
+std::vector <int> extractNonZeros(int selectedRow = 0){
+    std::vector<int> row;
+    for (int i = 0; i < boardSize; i++) {
+        if (board[selectedRow][i] != 0) {
+            row.push_back(board[selectedRow][i]);
+        }
+    }
+    return row;
+}
+
+std::vector <int> mergeNonZeros(std::vector <int> vector){
+    std::vector<int> merged;
+
+    for (size_t i = 0; i < vector.size(); i++){
+        if (i + 1 < vector.size() && vector[i] == vector[i + 1]){
+            merged.push_back(vector[i] + 1);
+            i++; // skip next
+        } 
+        else {
+            merged.push_back(vector[i]);
+        }
+    }
+    return merged;
+}
+
+std::vector <int> zeroPadLeft (std::vector <int> vector){
+    std::vector<int> newRow(boardSize, 0);
+
+    int i = boardSize - 1;
+    for (int val : vector) {
+        newRow[i--] = val;
+    }
+    return newRow;
+}
+
+std::vector <int> zeroPadRight (std::vector <int> vector){
+    std::vector<int> newRow(boardSize, 0);
+
+    int i = 0;
+    for (int val : vector) {
+        newRow[i++] = val;
+    }
+    return newRow;
 }
 
 void moveBoard(int direction){
@@ -116,82 +168,66 @@ void moveBoard(int direction){
     }
 }
 
-/**-Vector Naming- 
- * In the move[Direction]()functions below, vectors are named respectively to their relation to the original vector board.
- * (C)lockwise / (A)nti Clockwise - Direction of rotation.
- * 0-360 - Degrees of rotation.
- * (M)irrored - Board was mirrored after rotation.
- * 
- * For example: moveUp() uses the vector c90mBoard. If the global board is as follows: 
- *  \           |       |       |       |
- *           (J)|   1   |   2   |   3   |
- *       (I)    |       |       |       |
- *    ----------|-------+-------+-------|
- *              |
- *        a     | (0,0)   (0,1)   (0,2)
- *              |
- *    ----------|
- *              |
- *        b     | (1,0)
- *              |
- *    ----------|
- *              |
- *        c     | (2,0)
- *              |
- *    ----------|
- * 
- *      It would be represented in c90mBoard as this:  
- *  \           |       |       |       |
- *           (I)|   a   |   b   |   c   |
- *       (J)    |       |       |       |
- *    ----------|-------+-------+-------|
- *              |
- *        1     | (0,0)   (1,0)   (2,0)
- *              |
- *    ----------|
- *              |
- *        2     | (0,1)
- *              |
- *    ----------|
- *              |
- *        3     | (0,2)
- *              |
- *    ----------|  
- *    
- *    It was rotated 90 degrees clockwise and then mirrored.
- *    If it wasn't mirrored, the I index would progress as C, B, A; not A, B, C.
- */
 
 void moveUp(){
-    std::vector <std::vector <int>> c90mBoard;
-    for (int i = 0; i < boardSize; i++){        //Rotate and mirror the board.
+    std::vector <int> duck(boardSize, 0);
+    std::vector <std::vector <int>> rotatedBoard(boardSize, duck);
+    //if i were to rotate the board, i could just use moveRight and moveLeft functions to make vertical movement.
+    //i will rotate 90 degrees anti-clockwise.
+    for (int i = 0; i < boardSize; i++){
         for (int j = 0; j < boardSize; j++){
-            c90mBoard.at(j).push_back(board.at(i).at(j));
+            rotatedBoard.at(i).at(j) = board.at(j).at(boardSize - 1 - i);
         }
     }
-    //After rotating, we make the movements here.
+    board = rotatedBoard;
+    
+
+    moveLeft(); //now, move left to make the move.
+
+    //finally, rotate back to original orientation. so the game doesn't feel like an arithmethic tumbleweed.
+    for (int i = 0; i < boardSize; i++){
+        for (int j = 0; j < boardSize; j++){
+            rotatedBoard.at(i).at(j) = board.at(boardSize - 1 - j).at(i);
+        }
+    }
+    
+    board = rotatedBoard;
+    rotatedBoard.clear();
 }
 
 void moveLeft(){
     for (int i = 0; i < boardSize; i++){
-        board.at(i) = moveToBegin(board.at(i));
+        board.at(i) = zeroPadRight(mergeNonZeros(extractNonZeros(i)));
     }
-    
 }
 
 void moveDown(){
+    std::vector <int> duck(boardSize, 0);
+    std::vector <std::vector <int>> rotatedBoard(boardSize, duck); 
+    //if i were to rotate the board, i could just use moveRight and moveLeft functions to make vertical movement.
+    //i will rotate 90 degrees anti-clockwise.
+    for (int i = 0; i < boardSize; i++){
+        for (int j = 0; j < boardSize; j++){
+            rotatedBoard.at(i).at(j) = board.at(j).at(boardSize - 1 - i);
+        }
+    }
+    board = rotatedBoard;
 
+    moveRight(); //now, move right to make the move.
+
+    //finally, rotate back to original orientation. so the game doesn't feel like an arithmethic tumbleweed.
+    for (int i = 0; i < boardSize; i++){
+        for (int j = 0; j < boardSize; j++){
+            rotatedBoard.at(i).at(j) = board.at(boardSize - 1 - j).at(i);
+        }
+    }
+    
+    board = rotatedBoard;
+    rotatedBoard.clear();
 }
 
 void moveRight(){
-    
-}
-
-std::vector <int> moveToBegin(std::vector<int> vector){
-    vector.erase(find(vector.begin(), vector.end(), 0));
-    return vector;
-}
-
-void moveToEnd(std::vector<int> vector){
-
+    for (int i = 0; i < boardSize; i++){
+        board.at(i) = zeroPadLeft(mergeNonZeros(extractNonZerosR(i)));
+    }
 }

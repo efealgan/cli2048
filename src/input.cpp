@@ -35,22 +35,27 @@ int processInput(char input){
     switch (input){
         case 'w':
         case 'W':
+            std::cout << "Pressed UP\n";
             return Up;
         case 'a':
         case 'A':
+            std::cout << "Pressed LEFT\n";
             return Left;
         case 's':
         case 'S':
+            std::cout << "Pressed DOWN\n";
             return Down;
         case 'd':
         case 'D':
+            std::cout << "Pressed RIGHT\n";
             return Right;
         case 'q':
         case 'Q':
+            std::cout << "Pressed QUIT\n";
             return -1;
         default:
             std::cout << "Input wasn't accepted. Please try again.\n";
-            getInput();
+            processInput(getInput());
             return -1;
     }
 }

@@ -25,7 +25,7 @@ int main(){
 
     bool gameRunning = true;
     while(gameRunning){
-        getInput();
+        moveBoard(processInput(getInput()));
         spawnTile();
         drawBoard(board);
     }

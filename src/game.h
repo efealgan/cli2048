@@ -2,12 +2,10 @@
 #define GAME_H
 
 #include <vector>
-#include <random>
-#include <iostream>
 #include <bits/stdc++.h>
 
-#include <drawing.h>
-#include "input.h"
+
+
 
 /**
  * @brief The dimensions of the board.
@@ -45,9 +43,11 @@ void initBoard(int size);
 
 int spawnTile();
 
-void moveBoard(int direction);
-
 bool isBoardFull(std::vector <std::vector<int>> board);
+
+std::vector<size_t> findZeroIndices(const std::vector<int>& vector);
+
+void moveBoard(int direction);
 
 void moveUp();
 void moveLeft();
